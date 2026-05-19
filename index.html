@@ -1,19 +1,20 @@
+<!-- 
+ Integrantes: 
+  - Guilherme Fabretti : 202310286
+  - Leonardo Martins : 202310239
+  - Vinicius Calefo : 202310107
+-->
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Galeria 3D AR</title>
-
-  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <!-- AR.js para A-Frame -->
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-
   <style>
     body { margin: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-
-    /* HUD de instruções inicial */
     #intro {
       position: fixed; inset: 0; z-index: 9999;
       background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -31,8 +32,6 @@
       background: #4cc9f0; color: #1a1a2e; border: none;
       border-radius: 8px; font-weight: 600; cursor: pointer;
     }
-
-    /* Controles flutuantes durante AR */
     #controls {
       position: fixed; bottom: 20px; left: 50%;
       transform: translateX(-50%);
@@ -47,8 +46,6 @@
     #controls button.active {
       background: #f72585; color: #fff;
     }
-
-    /* Label do item atual */
     #label {
       position: fixed; top: 20px; left: 50%;
       transform: translateX(-50%);
@@ -56,53 +53,38 @@
       padding: 8px 16px; border-radius: 20px;
       font-size: 0.9rem; z-index: 100;
     }
-
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
-
-  <!-- Tela de introdução -->
   <div id="intro">
-    <h1>🎨 Galeria 3D em Realidade Aumentada</h1>
+    <h1>Galeria 3D em Realidade Aumentada</h1>
     <p>
       Esta é uma mini-galeria interativa. Aponte a câmera do celular para o
       <strong>marker Hiro</strong> e veja objetos 3D aparecerem sobre ele.<br><br>
       Use os botões para trocar de obra e <strong>toque no objeto</strong> para interagir.
     </p>
     <a class="marker-link" href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank">
-      📥 Abrir/baixar o marker Hiro
+      Abrir/baixar o marker Hiro
     </a>
     <button onclick="iniciar()">Iniciar experiência</button>
   </div>
-
-  <!-- Label com nome da obra atual -->
   <div id="label" class="hidden">Obra: <span id="label-text">Cubo Cósmico</span></div>
-
-  <!-- Controles de troca de obra -->
   <div id="controls" class="hidden">
     <button class="obra-btn active" data-obra="cubo">Cubo</button>
-    <button class="obra-btn" data-obra="esfera">Esfera</button>
-    <button class="obra-btn" data-obra="torus">Torus</button>
+    <button class="obra-btn" data-obra="bola">Bola</button>
+    <button class="obra-btn" data-obra="rosquinha">Rosquinha</button>
   </div>
-
-  <!-- Cena A-Frame + AR.js -->
   <a-scene
     embedded
     arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
     renderer="logarithmicDepthBuffer: true; precision: medium;"
     vr-mode-ui="enabled: false"
     class="hidden">
-
-    <!-- Assets pré-carregados -->
     <a-assets>
       <a-mixin id="brilho" material="metalness: 0.4; roughness: 0.3"></a-mixin>
     </a-assets>
-
-    <!-- Marker Hiro -->
     <a-marker preset="hiro" id="marker-principal">
-
-      <!-- Grupo de objetos: só um visível por vez -->
       <a-entity id="obra-cubo" class="obra" visible="true">
         <a-box
           position="0 0.5 0"
@@ -113,8 +95,7 @@
           animation__rot="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
         </a-box>
       </a-entity>
-
-      <a-entity id="obra-esfera" class="obra" visible="false">
+      <a-entity id="obra-bola" class="obra" visible="false">
         <a-sphere
           position="0 0.7 0"
           radius="0.6"
@@ -124,9 +105,8 @@
           animation__float="property: position; to: 0 1 0; dir: alternate; loop: true; dur: 1500; easing: easeInOutSine">
         </a-sphere>
       </a-entity>
-
-      <a-entity id="obra-torus" class="obra" visible="false">
-        <a-torus
+      <a-entity id="obra-rosquinha" class="obra" visible="false">
+        <a-rosquinha
           position="0 0.6 0"
           radius="0.5"
           radius-tubular="0.1"
@@ -134,62 +114,42 @@
           mixin="brilho"
           class="clicavel"
           animation__rot="property: rotation; to: 360 360 0; loop: true; dur: 6000; easing: linear">
-        </a-torus>
+        </a-rosquinha>
       </a-entity>
-
-      <!-- Iluminação para os materiais com metalness funcionarem -->
       <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
       <a-light type="directional" position="1 2 1" intensity="0.8"></a-light>
-
     </a-marker>
-
-    <!-- Câmera necessária para AR.js -->
     <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    // === Inicialização ===
     function iniciar() {
       document.getElementById('intro').classList.add('hidden');
       document.querySelector('a-scene').classList.remove('hidden');
       document.getElementById('controls').classList.remove('hidden');
       document.getElementById('label').classList.remove('hidden');
     }
-
-    // === Troca de obras via botões ===
     const obras = {
       cubo:   { label: 'Cubo Cósmico',     elId: 'obra-cubo' },
-      esfera: { label: 'Esfera Vibrante',  elId: 'obra-esfera' },
-      torus:  { label: 'Torus Solar',      elId: 'obra-torus' }
+      bola: { label: 'bola Vibrante',  elId: 'obra-bola' },
+      rosquinha:  { label: 'rosquinha Solar',      elId: 'obra-rosquinha' }
     };
-
     document.querySelectorAll('.obra-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const escolha = btn.dataset.obra;
-
-        // estado dos botões
         document.querySelectorAll('.obra-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-
-        // visibilidade das entidades
         Object.values(obras).forEach(o => {
           document.getElementById(o.elId).setAttribute('visible', false);
         });
         document.getElementById(obras[escolha].elId).setAttribute('visible', true);
-
-        // label
         document.getElementById('label-text').textContent = obras[escolha].label;
       });
     });
-
-    // === Interação por clique/toque no objeto 3D ===
-    // A-Frame dispara o evento 'click' quando o raycaster da câmera bate no objeto.
-    // Em mobile, basta tocar na tela onde o objeto está visível.
     document.querySelector('a-scene').addEventListener('loaded', () => {
       const cliveis = document.querySelectorAll('.clicavel');
       cliveis.forEach(el => {
         el.addEventListener('click', () => {
-          // Pequena animação de "pulso" ao tocar
           el.removeAttribute('animation__pulse');
           el.setAttribute('animation__pulse', {
             property: 'scale',
@@ -202,12 +162,9 @@
           });
         });
       });
-
-      // Habilita raycaster que reage a toques na tela
       const camera = document.querySelector('[camera]');
       camera.setAttribute('cursor', 'rayOrigin: mouse; fuse: false');
     });
   </script>
-
 </body>
 </html>
